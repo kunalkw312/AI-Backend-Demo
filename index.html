@@ -204,7 +204,7 @@
         <!-- === BACKEND COLUMN === -->
         <div class="backend-column">
             <div class="card">
-                <h2>  Backend Log</h2>
+                <h2>Fake Backend Log</h2>
                 <pre id="console-output">> Waiting for user login...</pre>
             </div>
         </div>
@@ -227,13 +227,13 @@
         const submitButton = document.getElementById('submit-button');
 
         let currentUsername = "";
-        let userHistory = []; // Our "  database" in memory
+        let userHistory = []; // Our "fake database" in memory
 
         /**
-         * A helper function to log messages to our "  Backend" console
+         * A helper function to log messages to our "Fake Backend" console
          */
         function log(message) {
-            console.log(message); // Log to the   F12 console
+            console.log(message); // Log to the real F12 console
             consoleOutput.textContent += `> ${message}\n`;
             consoleOutput.scrollTop = consoleOutput.scrollHeight; // Auto-scroll
         }
@@ -241,7 +241,7 @@
         /**
          * A helper function to simulate a network delay
          */
-        function  Delay(ms) {
+        function fakeDelay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
@@ -275,9 +275,9 @@
             log(`--- NEW SESSION ---`);
             log(`Login request for user: '${currentUsername}'`);
             
-            //   BACKEND: Check database (localStorage)
+            // FAKE BACKEND: Check database (localStorage)
             log(`Querying database for user history...`);
-            await  Delay(1000); // Simulate network call to DB
+            await fakeDelay(1000); // Simulate network call to DB
             
             const historyKey = `mediguide_history_${currentUsername}`;
             const storedHistory = localStorage.getItem(historyKey);
@@ -299,14 +299,14 @@
         });
 
         // ===================================================================
-        // === START OF   AI INTEGRATION ===
+        // === START OF REAL AI INTEGRATION ===
         // ===================================================================
 
         /**
-         * Calls the   Gemini API with our personalized prompt.
+         * Calls the REAL Gemini API with our personalized prompt.
          */
         async function callGeminiAPI(augmentedPrompt) {
-            log(`3. Sending request to   Generative AI...`);
+            log(`3. Sending request to Generative AI...`);
             
             // --- This is the JSON structure we want the AI to return ---
             const schema = {
@@ -318,7 +318,20 @@
                 required: ["diagnosis", "recommendation"]
             };
 
-            const apiKey = ""; // Leave blank, will be auto-provided
+            // ========================================================
+            // == ⬇️ IMPORTANT! PASTE YOUR API KEY HERE ⬇️ ==
+            // ========================================================
+            // 1. Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
+            // 2. Paste it inside the quotes.
+            const apiKey = "AIzaSyAJXz6E8Yi2KFXeMlZp_DPkf0a9oNo2qhw"; 
+            // ========================================================
+
+            if (apiKey === "PASTE_YOUR_API_KEY_HERE" || apiKey === "") {
+                 log("❌ CRITICAL: API key is missing.");
+                 log("...Please get a key from Google AI Studio and paste it into the apiKey variable.");
+                 return null;
+            }
+
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const payload = {
@@ -352,7 +365,13 @@
                             throw new Error("Invalid JSON response from API.");
                         }
                     } else {
-                        throw new Error(`API Error: ${response.status}`);
+                        const errorData = await response.json();
+                        log(`...API Error: ${response.status} ${JSON.stringify(errorData.error.message)}`);
+                        // Check for domain authorization error
+                        if (errorData.error.message.includes("permission")) {
+                             log("...Visit Google AI Studio to authorize your GitHub domain.");
+                        }
+                        throw new Error(errorData.error.message);
                     }
                 } catch (error) {
                     log(`...AI call failed (Attempt ${i+1}/${retries}): ${error.message}`);
@@ -390,12 +409,12 @@
             log(`Received input: "${symptoms}"`);
             log(`Medical History: "${history}"`);
 
-            // --- 1. "Personalized AI Engine" -   History Analysis ---
+            // --- 1. "Personalized AI Engine" - Fake History Analysis ---
             log(`1. Analyzing user history for patterns...`);
-            await  Delay(750);
+            await fakeDelay(750);
             
             let historyAnalysis = "User has no significant past history.";
-            //   analysis: check if they've reported a headache before
+            // Fake analysis: check if they've reported a headache before
             if (userHistory.some(record => record.symptoms.toLowerCase().includes("headache"))) {
                 historyAnalysis = "User frequently reports headaches.";
             } else if (userHistory.some(record => record.symptoms.toLowerCase().includes("cough"))) {
@@ -420,16 +439,16 @@
 
             log(`...Augmented Prompt created.`);
             
-            // --- 3. Call the   AI ---
+            // --- 3. Call the REAL AI ---
             const aiResponse = await callGeminiAPI(systemPrompt);
 
             let diagnosis, recommendation;
 
             if (aiResponse) {
-                // Use   AI response
+                // Use REAL AI response
                 diagnosis = aiResponse.diagnosis;
                 recommendation = aiResponse.recommendation;
-                log(`... AI Diagnosis: ${diagnosis}`);
+                log(`...Real AI Diagnosis: ${diagnosis}`);
             } else {
                 // Fallback if AI fails
                 log(`...AI FAILED. Using simple fallback.`);
@@ -439,13 +458,13 @@
             
             recommendationOutput.innerHTML = `<strong>${diagnosis}:</strong> ${recommendation}`;
 
-            // --- 4. "SAVE" to   Database ---
+            // --- 4. "SAVE" to Fake Database ---
             log(`5. Saving new record to database...`);
             
             const newRecord = {
                 date: new Date().toLocaleDateString(),
                 symptoms: symptoms,
-                diagnosis: diagnosis // Save the   diagnosis
+                diagnosis: diagnosis // Save the real diagnosis
             };
             userHistory.push(newRecord);
 
@@ -453,7 +472,7 @@
             const historyKey = `mediguide_history_${currentUsername}`;
             localStorage.setItem(historyKey, JSON.stringify(userHistory));
 
-            await  Delay(500);
+            await fakeDelay(500);
             log(`...Save complete.`);
             log(`--- Process Finished. ---`);
 
@@ -468,3 +487,4 @@
 </body>
 
 </html>
+
