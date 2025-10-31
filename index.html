@@ -5,12 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediGuide - AI Backend Demo</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Load Poppins Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    
     <style>
-        :root {
+        /* Define custom colors and styles from our MediGuide app */
+        body {
+            font-family: 'Poppins', sans-serif;
             --primary-color: #01796F;
             --light-bg: #f0f4f8;
             --card-bg: #ffffff;
@@ -18,197 +24,83 @@
             --console-bg: #2b2b2b;
             --console-text: #00ff00;
         }
+        /* Custom Tailwind colors */
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .hover\:bg-primary-dark:hover { background-color: #043927; }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .app-column,
-        .backend-column {
-            flex: 1;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        }
-
-        h1, h2, h3 {
-            color: var(--primary-color);
-            margin-top: 0;
-            border-bottom: 2px solid var(--light-bg);
-            padding-bottom: 5px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-sizing: border-box; /* Important for padding */
-            font-family: 'Poppins', sans-serif;
-            font-size: 1em;
-        }
-
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #fff;
-            background-color: var(--primary-color);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #043927;
-        }
-
-        button:disabled {
-            background-color: #9E9E9E;
-            cursor: not-allowed;
-        }
-
+        /* Console styling */
         #console-output {
             background-color: var(--console-bg);
             color: var(--console-text);
-            padding: 15px;
-            border-radius: 8px;
             font-family: "Courier New", monospace;
-            font-size: 0.9em;
             white-space: pre-wrap;
             word-wrap: break-word;
-            height: 500px;
-            overflow-y: auto;
         }
-
-        #app-view {
-            display: none; /* Hidden by default */
-        }
-
-        #user-history-list {
-            list-style: none;
-            padding-left: 0;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid var(--light-bg);
-            border-radius: 8px;
-            padding: 10px;
-        }
-        #user-history-list li {
-            padding: 8px;
-            border-bottom: 1px dashed #eee;
-        }
-        #user-history-list li:last-child {
-            border-bottom: none;
-        }
-        #recommendation-output {
-            background: #E8F5E9; /* Light green */
-            color: #1B5E20; /* Dark green text */
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            min-height: 50px;
-        }
-
-        /* Responsive Layout */
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-            }
-        }
-
     </style>
 </head>
 
-<body>
+<body class="bg-gray-100">
 
-    <div class="container">
-        
-        <!-- === APPLICATION COLUMN === -->
-        <div class="app-column">
-            <div class="card">
-                
-                <!-- Login View -->
-                <div id="login-view">
-                    <h1>MediGuide AI Backend Demo</h1>
-                    <p>Enter a username to simulate logging in and loading your personal health history.</p>
-                    <label for="username">Username</label>
-                    <input type="text" id="username" value="JohnDoe">
-                    <button id="login-button">Login & Load History</button>
-                </div>
-
-                <!-- Main App View (Hidden) -->
-                <div id="app-view">
-                    <h2 id="welcome-header">Welcome, JohnDoe!</h2>
+    <div class="container mx-auto max-w-6xl p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- === APPLICATION COLUMN === -->
+            <div class="app-column">
+                <div class="card bg-white rounded-lg shadow-lg p-6">
                     
-                    <h3>Your Symptom History</h3>
-                    <ul id="user-history-list">
-                        <li>No history found.</li>
-                    </ul>
-
-                    <form id="symptom-form">
-                        <label for="symptoms">Enter Symptoms</label>
-                        <textarea id="symptoms">I have a fever and a bad headache</textarea>
+                    <!-- Login View -->
+                    <div id="login-view">
+                        <h1 class="text-2xl font-bold text-primary mb-2">MediGuide AI Backend Demo</h1>
+                        <p class="text-gray-600">Enter a username to simulate logging in and loading your personal health history.</p>
                         
-                        <label for="medical-history">Medical History (Optional)</label>
-                        <input type="text" id="medical-history" value="Seasonal allergies">
+                        <label for="username" class="block text-sm font-medium text-gray-700 mt-4">Username</label>
+                        <input type="text" id="username" value="JohnDoe" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                         
-                        <button type="submit" id="submit-button">Get Recommendation</button>
-                    </form>
-
-                    <h3>AI Recommendation:</h3>
-                    <div id="recommendation-output">
-                        Your personalized recommendation will appear here...
+                        <button id="login-button" class="mt-4 w-full bg-primary text-white py-2 px-4 rounded-md font-semibold hover:bg-primary-dark">
+                            Login & Load History
+                        </button>
                     </div>
+
+                    <!-- Main App View (Hidden) -->
+                    <div id="app-view" class="hidden">
+                        <h2 id="welcome-header" class="text-xl font-bold text-primary"></h2>
+                        
+                        <h3 class="text-lg font-semibold text-gray-800 mt-4">Your Symptom History</h3>
+                        <ul id="user-history-list" class="text-sm text-gray-600 list-none p-2 mt-2 border rounded-md max-h-32 overflow-y-auto">
+                            <li>No history found.</li>
+                        </ul>
+
+                        <form id="symptom-form" class="mt-4">
+                            <label for="symptoms" class="block text-sm font-medium text-gray-700">Enter Today's Symptoms</label>
+                            <textarea id="symptoms" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500" rows="3">I have a fever and a bad headache</textarea>
+                            
+                            <label for="medical-history" class="block text-sm font-medium text-gray-700 mt-4">Medical History (Optional)</label>
+                            <input type="text" id="medical-history" value="Seasonal allergies" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            
+                            <button type="submit" id="submit-button" class="mt-6 w-full bg-primary text-white py-2 px-4 rounded-md font-semibold hover:bg-primary-dark disabled:bg-gray-400">
+                                Get Recommendation
+                            </button>
+                        </form>
+
+                        <h3 class="text-lg font-semibold text-gray-800 mt-6">AI Recommendation:</h3>
+                        <div id="recommendation-output" class="p-4 mt-2 bg-teal-50 border border-teal-200 text-teal-800 rounded-md min-h-[50px]">
+                            Your personalized recommendation will appear here...
+                        </div>
+                    </div>
+
                 </div>
-
             </div>
-        </div>
 
-        <!-- === BACKEND COLUMN === -->
-        <div class="backend-column">
-            <div class="card">
-                <h2>Fake Backend Log</h2>
-                <pre id="console-output">> Waiting for user login...</pre>
+            <!-- === FAKE BACKEND COLUMN === -->
+            <div class="backend-column">
+                <div class="card bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-primary">Fake Backend Log</h2>
+                    <pre id="console-output" class="p-4 mt-4 text-sm rounded-md h-[500px] overflow-y-auto">> Waiting for user login...</pre>
+                </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <script>
@@ -251,13 +143,14 @@
         function renderHistory() {
             historyList.innerHTML = ''; // Clear the list
             if (userHistory.length === 0) {
-                historyList.innerHTML = '<li>No history found.</li>';
+                historyList.innerHTML = '<li class="italic">No history found.</li>';
                 return;
             }
             // Show most recent first
             [...userHistory].reverse().forEach(record => {
                 const li = document.createElement('li');
                 li.textContent = `[${record.date}] Symptoms: ${record.symptoms}`;
+                li.className = "pb-2 mb-2 border-b border-gray-100 last:border-b-0";
                 historyList.appendChild(li);
             });
         }
@@ -293,8 +186,8 @@
             // Update UI
             welcomeHeader.textContent = `Welcome, ${currentUsername}!`;
             renderHistory();
-            loginView.style.display = 'none';
-            appView.style.display = 'block';
+            loginView.classList.add('hidden');
+            appView.classList.remove('hidden');
             log(`--- User Authenticated. Ready for input. ---`);
         });
 
@@ -308,7 +201,7 @@
         async function callGeminiAPI(augmentedPrompt) {
             log(`3. Sending request to Generative AI...`);
             
-            // --- This is the JSON structure we want the AI to return ---
+            // This is the JSON structure we want the AI to return
             const schema = {
                 type: "OBJECT",
                 properties: {
@@ -319,18 +212,10 @@
             };
 
             // ========================================================
-            // == ⬇️ IMPORTANT! PASTE YOUR API KEY HERE ⬇️ ==
+            // == ⬇️ This is your API Key ⬇️ ==
             // ========================================================
-            // 1. Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
-            // 2. Paste it inside the quotes.
-            const apiKey = "AIzaSyAJXz6E8Yi2KFXeMlZp_DPkf0a9oNo2qhw"; 
+            const apiKey = "AIzaSyAJXz6E8Yi2KFXeMlZp_DPkf0a9oNo2qhw";
             // ========================================================
-
-            if (apiKey === "PASTE_YOUR_API_KEY_HERE" || apiKey === "") {
-                 log("❌ CRITICAL: API key is missing.");
-                 log("...Please get a key from Google AI Studio and paste it into the apiKey variable.");
-                 return null;
-            }
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -366,12 +251,14 @@
                         }
                     } else {
                         const errorData = await response.json();
-                        log(`...API Error: ${response.status} ${JSON.stringify(errorData.error.message)}`);
-                        // Check for domain authorization error
-                        if (errorData.error.message.includes("permission")) {
+                        let errorMsg = errorData.error.message;
+                        log(`...API Error: ${response.status} ${errorMsg}`);
+                        
+                        // This check is CRITICAL for GitHub Pages
+                        if (response.status === 403 && errorMsg.includes("permission")) {
                              log("...Visit Google AI Studio to authorize your GitHub domain.");
                         }
-                        throw new Error(errorData.error.message);
+                        throw new Error(errorMsg);
                     }
                 } catch (error) {
                     log(`...AI call failed (Attempt ${i+1}/${retries}): ${error.message}`);
@@ -414,7 +301,6 @@
             await fakeDelay(750);
             
             let historyAnalysis = "User has no significant past history.";
-            // Fake analysis: check if they've reported a headache before
             if (userHistory.some(record => record.symptoms.toLowerCase().includes("headache"))) {
                 historyAnalysis = "User frequently reports headaches.";
             } else if (userHistory.some(record => record.symptoms.toLowerCase().includes("cough"))) {
@@ -423,7 +309,7 @@
 
             log(`...Analysis complete: ${historyAnalysis}`);
             
-            // --- 2. Create the Personalized Prompt ---
+            // --- 2. Create the Personalized Prompt (as described in your doc) ---
             log(`2. Augmenting prompt for Generative AI...`);
             
             const systemPrompt = `You are a medical assistant. 
@@ -456,7 +342,7 @@
                 recommendation = "Could not reach AI. Please monitor symptoms and rest. If they worsen, see a doctor.";
             }
             
-            recommendationOutput.innerHTML = `<strong>${diagnosis}:</strong> ${recommendation}`;
+            recommendationOutput.innerHTML = `<strong class="block">${diagnosis}</strong> ${recommendation}`;
 
             // --- 4. "SAVE" to Fake Database ---
             log(`5. Saving new record to database...`);
