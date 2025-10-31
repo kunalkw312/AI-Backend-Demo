@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediGuide - AI Backend Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #01796F;
+            --light-bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-color: #1a1a2e;
+            --console-bg: #2b2b2b;
+            --console-text: #00ff00;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .app-column,
+        .backend-column {
+            flex: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box; /* Important for padding */
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #043927;
+        }
+
+        button:disabled {
+            background-color: #9E9E9E;
+            cursor: not-allowed;
+        }
+
+        #console-output {
+            background-color: var(--console-bg);
+            color: var(--console-text);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            height: 500px;
+            overflow-y: auto;
+        }
+
+        #app-view {
+            display: none; /* Hidden by default */
+        }
+
+        #user-history-list {
+            list-style: none;
+            padding-left: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--light-bg);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        #user-history-list li {
+            padding: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        #user-history-list li:last-child {
+            border-bottom: none;
+        }
+        #recommendation-output {
+            background: #E8F5E9; /* Light green */
+            color: #1B5E20; /* Dark green text */
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            min-height: 50px;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        
+        <!-- === APPLICATION COLUMN === -->
+        <div class="app-column">
+            <div class="card">
+                
+                <!-- Login View -->
+                <div id="login-view">
+                    <h1>MediGuide AI Backend Demo</h1>
+                    <p>Enter a username to simulate logging in and loading your personal health history.</p>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="JohnDoe">
+                    <button id="login-button">Login & Load History</button>
+                </div>
+
+                <!-- Main App View (Hidden) -->
+                <div id="app-view">
+                    <h2 id="welcome-header">Welcome, JohnDoe!</h2>
+                    
+                    <h3>Your Symptom History</h3>
+                    <ul id="user-history-list">
+                        <li>No history found.</li>
+                    </ul>
+
+                    <form id="symptom-form">
+                        <label for="symptoms">Enter Symptoms</label>
+                        <textarea id="symptoms">I have a fever and a bad headache</textarea>
+                        
+                        <label for="medical-history">Medical History (Optional)</label>
+                        <input type="text" id="medical-history" value="Seasonal allergies">
+                        
+                        <button type="submit" id="submit-button">Get Recommendation</button>
+                    </form>
+
+                    <h3>AI Recommendation:</h3>
+                    <div id="recommendation-output">
+                        Your personalized recommendation will appear here...
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- === BACKEND COLUMN === -->
+        <div class="backend-column">
+            <div class="card">
+                <h2>  Backend Log</h2>
+                <pre id="console-output">> Waiting for user login...</pre>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Get all our HTML elements ---
+        const loginView = document.getElementById('login-view');
+        const appView = document.getElementById('app-view');
+        const loginButton = document.getElementById('login-button');
+        const usernameInput = document.getElementById('username');
+        const symptomForm = document.getElementById('symptom-form');
+        const symptomsInput = document.getElementById('symptoms');
+        const historyInput = document.getElementById('medical-history');
+        const welcomeHeader = document.getElementById('welcome-header');
+        const historyList = document.getElementById('user-history-list');
+        const recommendationOutput = document.getElementById('recommendation-output');
+        const consoleOutput = document.getElementById('console-output');
+        const submitButton = document.getElementById('submit-button');
+
+        let currentUsername = "";
+        let userHistory = []; // Our "  database" in memory
+
+        /**
+         * A helper function to log messages to our "  Backend" console
+         */
+        function log(message) {
+            console.log(message); // Log to the   F12 console
+            consoleOutput.textContent += `> ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight; // Auto-scroll
+        }
+
+        /**
+         * A helper function to simulate a network delay
+         */
+        function  Delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /**
+         * Renders the user's history from memory to the screen
+         */
+        function renderHistory() {
+            historyList.innerHTML = ''; // Clear the list
+            if (userHistory.length === 0) {
+                historyList.innerHTML = '<li>No history found.</li>';
+                return;
+            }
+            // Show most recent first
+            [...userHistory].reverse().forEach(record => {
+                const li = document.createElement('li');
+                li.textContent = `[${record.date}] Symptoms: ${record.symptoms}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        /**
+         * Handles the login button click
+         */
+        loginButton.addEventListener('click', async () => {
+            currentUsername = usernameInput.value.trim();
+            if (currentUsername.length === 0) {
+                alert("Please enter a username.");
+                return;
+            }
+
+            log(`--- NEW SESSION ---`);
+            log(`Login request for user: '${currentUsername}'`);
+            
+            //   BACKEND: Check database (localStorage)
+            log(`Querying database for user history...`);
+            await  Delay(1000); // Simulate network call to DB
+            
+            const historyKey = `mediguide_history_${currentUsername}`;
+            const storedHistory = localStorage.getItem(historyKey);
+
+            if (storedHistory) {
+                userHistory = JSON.parse(storedHistory);
+                log(`✅ Success: Found ${userHistory.length} past records for '${currentUsername}'.`);
+            } else {
+                userHistory = [];
+                log(`INFO: No history found. A new profile will be created.`);
+            }
+
+            // Update UI
+            welcomeHeader.textContent = `Welcome, ${currentUsername}!`;
+            renderHistory();
+            loginView.style.display = 'none';
+            appView.style.display = 'block';
+            log(`--- User Authenticated. Ready for input. ---`);
+        });
+
+        // ===================================================================
+        // === START OF   AI INTEGRATION ===
+        // ===================================================================
+
+        /**
+         * Calls the   Gemini API with our personalized prompt.
+         */
+        async function callGeminiAPI(augmentedPrompt) {
+            log(`3. Sending request to   Generative AI...`);
+            
+            // --- This is the JSON structure we want the AI to return ---
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    "diagnosis": { "type": "STRING" },
+                    "recommendation": { "type": "STRING" }
+                },
+                required: ["diagnosis", "recommendation"]
+            };
+
+            const apiKey = ""; // Leave blank, will be auto-provided
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: augmentedPrompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
+            };
+
+            // Exponential backoff for retries
+            let response;
+            let retries = 3;
+            let delay = 1000;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        log(`4. AI Response Received.`);
+                        const result = await response.json();
+                        const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        if (jsonText) {
+                            return JSON.parse(jsonText); // Success!
+                        } else {
+                            throw new Error("Invalid JSON response from API.");
+                        }
+                    } else {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+                } catch (error) {
+                    log(`...AI call failed (Attempt ${i+1}/${retries}): ${error.message}`);
+                    if (i < retries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; // Exponential backoff
+                    } else {
+                        log(`❌ CRITICAL: AI call failed after ${retries} attempts.`);
+                        return null; // Return null on final failure
+                    }
+                }
+            }
+        }
+
+
+        /**
+         * Handles the symptom form submission
+         */
+        symptomForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop the page from reloading
+            submitButton.disabled = true; // Disable button during processing
+            submitButton.textContent = "Analyzing...";
+
+            const symptoms = symptomsInput.value.trim();
+            const history = historyInput.value.trim();
+            
+            if (symptoms.length === 0) {
+                alert("Please enter your symptoms.");
+                submitButton.disabled = false;
+                submitButton.textContent = "Get Recommendation";
+                return;
+            }
+
+            log(`--- NEW SUBMISSION ---`);
+            log(`Received input: "${symptoms}"`);
+            log(`Medical History: "${history}"`);
+
+            // --- 1. "Personalized AI Engine" -   History Analysis ---
+            log(`1. Analyzing user history for patterns...`);
+            await  Delay(750);
+            
+            let historyAnalysis = "User has no significant past history.";
+            //   analysis: check if they've reported a headache before
+            if (userHistory.some(record => record.symptoms.toLowerCase().includes("headache"))) {
+                historyAnalysis = "User frequently reports headaches.";
+            } else if (userHistory.some(record => record.symptoms.toLowerCase().includes("cough"))) {
+                historyAnalysis = "User has a recent history of coughing.";
+            }
+
+            log(`...Analysis complete: ${historyAnalysis}`);
+            
+            // --- 2. Create the Personalized Prompt ---
+            log(`2. Augmenting prompt for Generative AI...`);
+            
+            const systemPrompt = `You are a medical assistant. 
+            First, analyze the user's history and current symptoms.
+            Then, provide a brief, one-sentence diagnosis and a 1-2 sentence recommendation.
+            If their history is relevant (e.g., they report headaches often and have one now),
+            mention this in the recommendation.
+            
+            Here is the data:
+            - User's Past History Summary: ${historyAnalysis}
+            - User's Stated Medical Conditions: ${history || "None"}
+            - User's Current Symptoms: "${symptoms}"`;
+
+            log(`...Augmented Prompt created.`);
+            
+            // --- 3. Call the   AI ---
+            const aiResponse = await callGeminiAPI(systemPrompt);
+
+            let diagnosis, recommendation;
+
+            if (aiResponse) {
+                // Use   AI response
+                diagnosis = aiResponse.diagnosis;
+                recommendation = aiResponse.recommendation;
+                log(`... AI Diagnosis: ${diagnosis}`);
+            } else {
+                // Fallback if AI fails
+                log(`...AI FAILED. Using simple fallback.`);
+                diagnosis = "General Symptoms";
+                recommendation = "Could not reach AI. Please monitor symptoms and rest. If they worsen, see a doctor.";
+            }
+            
+            recommendationOutput.innerHTML = `<strong>${diagnosis}:</strong> ${recommendation}`;
+
+            // --- 4. "SAVE" to   Database ---
+            log(`5. Saving new record to database...`);
+            
+            const newRecord = {
+                date: new Date().toLocaleDateString(),
+                symptoms: symptoms,
+                diagnosis: diagnosis // Save the   diagnosis
+            };
+            userHistory.push(newRecord);
+
+            // Save to localStorage
+            const historyKey = `mediguide_history_${currentUsername}`;
+            localStorage.setItem(historyKey, JSON.stringify(userHistory));
+
+            await  Delay(500);
+            log(`...Save complete.`);
+            log(`--- Process Finished. ---`);
+
+            // Update the history list on screen and re-enable button
+            renderHistory();
+            submitButton.disabled = false;
+            submitButton.textContent = "Get Recommendation";
+        });
+
+    </script>
+
+</body>
+
+</html>
