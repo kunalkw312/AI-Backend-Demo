@@ -92,10 +92,10 @@
                 </div>
             </div>
 
-            <!-- === FAKE BACKEND COLUMN === -->
+            <!-- ===  BACKEND COLUMN === -->
             <div class="backend-column">
                 <div class="card bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-primary">Fake Backend Log</h2>
+                    <h2 class="text-xl font-bold text-primary"> Backend Log</h2>
                     <pre id="console-output" class="p-4 mt-4 text-sm rounded-md h-[500px] overflow-y-auto">> Waiting for user login...</pre>
                 </div>
             </div>
@@ -119,10 +119,10 @@
         const submitButton = document.getElementById('submit-button');
 
         let currentUsername = "";
-        let userHistory = []; // Our "fake database" in memory
+        let userHistory = []; // Our " database" in memory
 
         /**
-         * A helper function to log messages to our "Fake Backend" console
+         * A helper function to log messages to our " Backend" console
          */
         function log(message) {
             console.log(message); // Log to the real F12 console
@@ -133,7 +133,7 @@
         /**
          * A helper function to simulate a network delay
          */
-        function fakeDelay(ms) {
+        function Delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
@@ -168,9 +168,9 @@
             log(`--- NEW SESSION ---`);
             log(`Login request for user: '${currentUsername}'`);
             
-            // FAKE BACKEND: Check database (localStorage)
+            //  BACKEND: Check database (localStorage)
             log(`Querying database for user history...`);
-            await fakeDelay(1000); // Simulate network call to DB
+            await Delay(1000); // Simulate network call to DB
             
             const historyKey = `mediguide_history_${currentUsername}`;
             const storedHistory = localStorage.getItem(historyKey);
@@ -192,11 +192,11 @@
         });
 
         // ===================================================================
-        // === START OF REAL AI INTEGRATION ===
+        // === START OF AI INTEGRATION ===
         // ===================================================================
 
         /**
-         * Calls the REAL Gemini API with our personalized prompt.
+         * Calls with our personalized prompt.
          */
         async function callGeminiAPI(augmentedPrompt) {
             log(`3. Sending request to Generative AI...`);
@@ -296,9 +296,9 @@
             log(`Received input: "${symptoms}"`);
             log(`Medical History: "${history}"`);
 
-            // --- 1. "Personalized AI Engine" - Fake History Analysis ---
+            // --- 1. "Personalized AI Engine" -  History Analysis ---
             log(`1. Analyzing user history for patterns...`);
-            await fakeDelay(750);
+            await Delay(750);
             
             let historyAnalysis = "User has no significant past history.";
             if (userHistory.some(record => record.symptoms.toLowerCase().includes("headache"))) {
@@ -325,7 +325,7 @@
 
             log(`...Augmented Prompt created.`);
             
-            // --- 3. Call the REAL AI ---
+            // --- 3. Call the AI ---
             const aiResponse = await callGeminiAPI(systemPrompt);
 
             let diagnosis, recommendation;
@@ -334,7 +334,7 @@
                 // Use REAL AI response
                 diagnosis = aiResponse.diagnosis;
                 recommendation = aiResponse.recommendation;
-                log(`...Real AI Diagnosis: ${diagnosis}`);
+                log(`... AI Diagnosis: ${diagnosis}`);
             } else {
                 // Fallback if AI fails
                 log(`...AI FAILED. Using simple fallback.`);
@@ -344,7 +344,7 @@
             
             recommendationOutput.innerHTML = `<strong class="block">${diagnosis}</strong> ${recommendation}`;
 
-            // --- 4. "SAVE" to Fake Database ---
+            // --- 4. "SAVE" to  Database ---
             log(`5. Saving new record to database...`);
             
             const newRecord = {
@@ -358,7 +358,7 @@
             const historyKey = `mediguide_history_${currentUsername}`;
             localStorage.setItem(historyKey, JSON.stringify(userHistory));
 
-            await fakeDelay(500);
+            await Delay(500);
             log(`...Save complete.`);
             log(`--- Process Finished. ---`);
 
